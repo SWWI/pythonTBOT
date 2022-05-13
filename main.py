@@ -12,6 +12,7 @@ https://api.nationalize.io/?name=gayrat
 import logging
 # import telebot
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.utils.executor import start_webhook
 import requests
 import pprint # noqa
 from decouple import config
@@ -23,6 +24,14 @@ API_TOKEN = config('TOKEN')
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
+# webhook settings
+WEBHOOK_HOST = 'https://app-ttbot.herokuapp.com'
+WEBHOOK_PATH = '/'
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
+# webserver settings
+WEBAPP_HOST = 'localhost'  # or ip
+WEBAPP_PORT = 3001
 
 # DB CONFIGS
 client = pymongo.MongoClient(config('MONGO'))
@@ -223,6 +232,24 @@ async def echo_message(message):
     print(message.text)
     await message.answer(message.text)
 
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+    # insert code here to run it after start
+
+
+async def on_shutdown(dp):
+
+
+    # insert code here to run it before shutdown
+
+    # Remove webhook (not acceptable in some cases)
+    await bot.delete_webhook()
+
+    # Close DB connection (if used)
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+
+
 
 # bot.enable_save_next_step_handlers(delay=2)
 # bot.load_next_step_handlers()
@@ -230,4 +257,13 @@ async def echo_message(message):
 print("Bot started")
 
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    # executor.start_polling(dp, skip_updates=True)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )
