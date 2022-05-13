@@ -108,7 +108,7 @@ async def user():
 
 @dp.message_handler(commands=['user'])
 async def send_random_user(message):
-    x = user()
+    x = await user()
     func_user = collfunc.find_one({"id": message.chat.id})
     if not func_user:
         collfunc.insert_one({"id": message.chat.id, "func": "user", "count": 1})
@@ -156,8 +156,8 @@ async def send_random_user(message):
     # natist_name = message.from_user.first_name
     natist_name = message.text.split()
     if len(natist_name) > 1:
-        natist_name = natist_name[1]
-        x = natist_g(natist_name)
+        natist_name = natist_name
+        x = await natist_g(natist_name)
         await bot.send_message(message.chat.id, x)
     else:
         await bot.send_message(message.chat.id, "Please send me supported command For example:\n/me *Name*",
@@ -167,7 +167,6 @@ async def send_random_user(message):
 @dp.message_handler(lambda message: "Регистрация" in message.text)
 async def send_welcome(message: types.Message):
     p = await bot.send_message(message.chat.id, "Введите Ваше имя")
-    await bot.register_next_step_handler(p, set_min_reg)
 
 
 async def set_min_reg(message: types.Message):
@@ -185,7 +184,6 @@ async def set_max_age(message):
     if not message.text.isdigit():
         retype = await bot.send_message(message.chat.id,
                                   "Максимальный возраст должен состоять только из цифр")
-        bot.register_next_step_handler(retype, set_max_age)
     else:
         ## pass save method for this DB
         await bot.send_message(message.chat.id, "Успешно сохранен")
@@ -193,14 +191,14 @@ async def set_max_age(message):
 
 @dp.message_handler(commands=['btc'])
 async def send_btc_rate(message):
-    btc = bitcoin_rate()  # dict
+    btc = await bitcoin_rate()  # dict
     await bot.send_message(message.chat.id, f"Bitcoint currency: {btc['amount']}")
 
 
 @dp.message_handler(commands=['music'])
 async def send_songs(message):
     x = message.text.split()
-    music_get = music(x)
+    music_get = await music(x)
     await bot.send_message(message.chat.id, music_get)
 
 
@@ -220,7 +218,7 @@ async def weather():
 async def send_weather_temp(message):
     # pprint.pprint(message.json)
     # print(message.text.split())
-    x = weather()  # dict
+    x = await weather()  # dict
     # bitcoin_rate()
     await bot.send_message(message.chat.id, f"Weather temp: {x}  {weather()}")
     print(x)
