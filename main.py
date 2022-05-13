@@ -233,6 +233,7 @@ async def echo_message(message):
     await message.answer(message.text)
 
 async def on_startup(dp):
+    print(await bot.get_me())
     await bot.set_webhook(WEBHOOK_URL)
     # insert code here to run it after start
 
@@ -254,10 +255,11 @@ async def on_shutdown(dp):
 # bot.enable_save_next_step_handlers(delay=2)
 # bot.load_next_step_handlers()
 
-print("Bot started")
 
 if __name__ == '__main__':
     # executor.start_polling(dp, skip_updates=True)
+    print("Bot started")
+
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
